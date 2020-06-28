@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:live_rtmp_push_plugin/live_rtmp_push_plugin.dart';
 
 void main() {
   runApp(MyApp());
