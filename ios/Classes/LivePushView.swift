@@ -4,16 +4,19 @@
 
 import Foundation
 import libksygpulive
+import Flutter
 
 public class LivePushView: NSObject, FlutterPlatformView {
     var kit: KSYGPUStreamerKit?
     fileprivate var viewId: Int64!;
     fileprivate var channel: FlutterMethodChannel!
     fileprivate var frame: CGRect;
+    var layoutName: String?;
 
-    public init(withFrame frame: CGRect, viewIdentifier viewId: Int64, arguments args: Any?, binaryMessenger: FlutterBinaryMessenger) {
+    public init(withFrame frame: CGRect, viewIdentifier viewId: Int64, arguments args: Dictionary<String, String>, binaryMessenger: FlutterBinaryMessenger) {
         self.frame = frame
         self.viewId = viewId
+        self.layoutName = args["layout"]
         self.channel = FlutterMethodChannel(name: "com/xinlianshiye/live/action", binaryMessenger: binaryMessenger)
         super.init()
 
@@ -45,13 +48,15 @@ public class LivePushView: NSObject, FlutterPlatformView {
     public func view() -> UIView {
         let uiView = UIView(frame: CGRect(x: CGFloat(0), y: CGFloat(0), width: CGFloat(400), height: CGFloat(600)))
         uiView.layoutMargins = UIEdgeInsets(top: CGFloat(0), left: CGFloat(0), bottom: CGFloat(0), right: CGFloat(0))
-        let nibObjects = Bundle.main.loadNibNamed("Test", owner: nil, options: nil)
-        let view2 = nibObjects!.first as! UIView
-        uiView.addSubview(view2)
+        if layoutName != nil {
+            let nibObjects = Bundle.main.loadNibNamed(layoutName!, owner: nil, options: nil)
+            let view2 = nibObjects!.first as! UIView
+            uiView.addSubview(view2)
+        }
         return uiView
     }
 
-    func onMethodCall(call: FlutterMethodCall, result: @escaping FluterResult) {
+    func onMethodCall(call: FlutterMethodCall, result: @escaping FlutterResult) {
         let method = call.method
         switch method {
         case "setUrl":

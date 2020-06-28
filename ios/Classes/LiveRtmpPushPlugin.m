@@ -10,7 +10,7 @@
 
 @implementation LiveRtmpPushPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
-  [registrar registerViewFactory:[[CustomViewFactory alloc] initWithMessenger:[registrar messenger]] withId:@"com.xinlianshiye.live"];
+  [registrar registerViewFactory:[[LivePushViewFactory alloc] initWithMessenger:[registrar messenger]] withId:@"com.xinlianshiye.live"];
   [SwiftLiveRtmpPushPlugin registerWithRegistrar:registrar];
 }
 @end
