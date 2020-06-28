@@ -44,24 +44,35 @@ public class LivePushView: NSObject, FlutterPlatformView {
 
     public func view() -> UIView {
         let uiView = UIView(frame: CGRect(x: CGFloat(0), y: CGFloat(0), width: CGFloat(400), height: CGFloat(600)))
-        uiView.layoutMargins=UIEdgeInsets(top: CGFloat(0), left: CGFloat(0), bottom: CGFloat(0), right: CGFloat(0))
+        uiView.layoutMargins = UIEdgeInsets(top: CGFloat(0), left: CGFloat(0), bottom: CGFloat(0), right: CGFloat(0))
         let nibObjects = Bundle.main.loadNibNamed("Test", owner: nil, options: nil)
         let view2 = nibObjects!.first as! UIView
         uiView.addSubview(view2)
         return uiView
     }
 
-    func onMethodCall(call: FlutterMethodCall, result: @escaping FlutterResult) {
+    func onMethodCall(call: FlutterMethodCall, result: @escaping FluterResult) {
         let method = call.method
         switch method {
         case "setUrl":
-            kit?.streamerBase.startStream(NSURL.init(string: call.arguments as! String) as! URL)
-        case "start":
-            print("推流了")
-        case "stop":
-            print("停止了")
+            if kit == nil {
+                result("FALSE")
+            } else {
+                kit?.streamerBase?.startStream(NSURL.init(string: call.arguments as! String) as! URL)
+                result("TRUE")
+            }
+        case "startPush":
+            kit?.streamerBase.stopStream()
+        case "stopPush":
+            kit?.streamerBase.stopStream()
+        case "startRecord":
+            kit?.streamerBase.startBypassRecord(NSURL.init(string: call.arguments as! String) as! URL)
+        case "stopRecord":
+            kit?.streamerBase.stopBypassRecord()
         default:
-            print("默认")
+            print("未实现")
+            print(call.method)
+            print(call.arguments)
         }
     }
 }
