@@ -93,7 +93,7 @@ class LivePushView(context: Context, messenger: BinaryMessenger, args: HashMap<S
         // 设置预览View
         // 设置回调处理函数
         mStreamer.onInfoListener = KSYStreamer.OnInfoListener { i, i2, i3 ->
-
+            println("回调参数")
             println(i)
             println(i2)
             println(i3)
@@ -124,11 +124,31 @@ class LivePushView(context: Context, messenger: BinaryMessenger, args: HashMap<S
     override fun getView(): View = frameLayout
 
     override fun dispose() {
-        TODO("Not yet implemented")
+        println("销毁了")
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
+            "setUrl" -> {
+                if (mStreamer != null) {
+                    mStreamer.url = call.arguments.toString()
+                    result.success("TRUE");
+                } else {
+                    result.error("FALSE", "工具类没有初始化", null)
+                }
+            }
+            "startPush" -> {
+                mStreamer?.startStream()
+            }
+            "stopPush" -> {
+                mStreamer?.stopStream()
+            }
+            "startRecord" -> {
+                mStreamer?.startRecord(call.arguments.toString())
+            }
+            "stopRecord" -> {
+                mStreamer?.stopRecord()
+            }
             else -> {
                 println(call.method)
                 println(call.arguments)

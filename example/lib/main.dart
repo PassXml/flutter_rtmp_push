@@ -41,8 +41,8 @@ class _MyAppState extends State<MyApp> {
                       viewType: "com.xinlianshiye.live",
                       creationParams: <String, String>{
                         "layout": "livemain",
-                        "package": "com.xinlianshiye.live",
-                        "label": "你好时间"
+                        "package":
+                            "com.xinlianshiye.live.live_rtmp_push_plugin_example",
                       },
                       creationParamsCodec: const StandardMessageCodec(),
                     ),
