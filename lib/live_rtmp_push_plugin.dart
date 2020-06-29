@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 class LiveRtmpPushPlugin {
   static const MethodChannel _channel =
       const MethodChannel('com/xinlianshiye/live/action');
-   static const MethodChannel _channel2 =
+  static const MethodChannel _channel2 =
       const MethodChannel('live_rtmp_push_plugin');
 
   static Future<bool> setUrl(String url) async {
