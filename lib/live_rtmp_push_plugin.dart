@@ -29,6 +29,10 @@ class LiveRtmpPushPlugin {
     _channel.invokeMethod("stopRecord");
   }
 
+  static Future setFilter(int id) async {
+    _channel.invokeMethod("setFilter", id);
+  }
+
   static Future<String> get platformVersion async {
     final String version = await _channel2.invokeMethod('getPlatformVersion');
     return version;

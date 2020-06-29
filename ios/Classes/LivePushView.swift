@@ -12,6 +12,8 @@ public class LivePushView: NSObject, FlutterPlatformView {
     fileprivate var channel: FlutterMethodChannel!
     fileprivate var frame: CGRect;
     var layoutName: String?;
+    var _view:UIView?;
+    var _currentPinchZoomFactor: CGFloat?     //当前触摸缩放因子
 
     public init(withFrame frame: CGRect, viewIdentifier viewId: Int64, arguments args: Dictionary<String, String>, binaryMessenger: FlutterBinaryMessenger) {
         self.frame = frame
@@ -32,27 +34,45 @@ public class LivePushView: NSObject, FlutterPlatformView {
         if kit == nil {
             kit = KSYGPUStreamerKit.init(defaultCfg: ())
         }
-        print("版本号:\(kit?.getKSYVersion)")
+        print("版本号:\(String(describing: kit?.getKSYVersion()))")
         if kit != nil {
+            _view=view()
+            addPinchGestureRecognizer()
             kit?.streamerProfile = KSYStreamerProfile(rawValue: 200)!
             kit?.cameraPosition = AVCaptureDevice.Position.front
             kit?.videoOrientation = UIApplication.shared.statusBarOrientation
-            let filter = KSYBeautifyFaceFilter()
-            kit?.setupFilter(filter as! GPUImageOutput & GPUImageInput)
             kit?.previewDimension = CGSize.init(width: 1080, height: 1920)
             kit?.streamDimension = CGSize.init(width: 720, height: 1280)
-            kit?.startPreview(view())
+            kit?.startPreview(_view)
+            
         }
     }
 
+    
+    
+    //添加缩放手势，缩放时镜头放大或缩小
+    func addPinchGestureRecognizer() {
+        let pinch = UIPinchGestureRecognizer.init(target: self, action: #selector(pinchDetected(rec:)))
+        _view?.addGestureRecognizer(pinch)
+    }
+
+    @objc func pinchDetected(rec: UIPinchGestureRecognizer) {
+        if rec.state == .began {
+            _currentPinchZoomFactor = kit?.pinchZoomFactor
+        }
+        let zoomFactor = _currentPinchZoomFactor! * rec.scale    //当前触摸缩放因子*坐标比例
+        kit?.pinchZoomFactor = zoomFactor
+    }
+
     public func view() -> UIView {
-        let uiView = UIView(frame: CGRect(x: CGFloat(0), y: CGFloat(0), width: CGFloat(400), height: CGFloat(600)))
-        uiView.layoutMargins = UIEdgeInsets(top: CGFloat(0), left: CGFloat(0), bottom: CGFloat(0), right: CGFloat(0))
+        let uiView = UIView(frame: self.frame)
         if layoutName != nil {
+            uiView.layoutMargins = UIEdgeInsets(top: CGFloat(0), left: CGFloat(0), bottom: CGFloat(0), right: CGFloat(0))
             let nibObjects = Bundle.main.loadNibNamed(layoutName!, owner: nil, options: nil)
             let view2 = nibObjects!.first as! UIView
             uiView.addSubview(view2)
         }
+        
         return uiView
     }
 
@@ -63,7 +83,7 @@ public class LivePushView: NSObject, FlutterPlatformView {
             if kit == nil {
                 result("FALSE")
             } else {
-                kit?.streamerBase?.startStream(NSURL.init(string: call.arguments as! String) as! URL)
+                kit?.streamerBase?.startStream(NSURL.init(string: call.arguments as! String)! as URL)
                 result("TRUE")
             }
         case "startPush":
@@ -71,13 +91,19 @@ public class LivePushView: NSObject, FlutterPlatformView {
         case "stopPush":
             kit?.streamerBase.stopStream()
         case "startRecord":
-            kit?.streamerBase.startBypassRecord(NSURL.init(string: call.arguments as! String) as! URL)
+            kit?.streamerBase.startBypassRecord(NSURL.init(string: call.arguments as! String)! as URL)
         case "stopRecord":
             kit?.streamerBase.stopBypassRecord()
+        case "setFilter":
+            if call.arguments == nil {
+                kit?.setupFilter(nil)
+            } else {
+                kit?.setupFilter(KSYGPUBeautifyExtFilter()!)
+            }
         default:
-            print("未实现")
+            result("OK")
             print(call.method)
-            print(call.arguments)
+            print(call.arguments ?? "No Value")
         }
     }
 }
