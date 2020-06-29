@@ -1,14 +1,9 @@
 package com.xinlianshiye.live
 
 
-import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
 import android.opengl.GLSurfaceView
-import android.os.Build
 import android.view.View
-import android.widget.Toast
-import androidx.core.app.ActivityCompat
 import com.ksyun.media.streamer.encoder.VideoEncodeFormat
 import com.ksyun.media.streamer.filter.imgtex.ImgTexFilterMgt
 import com.ksyun.media.streamer.framework.AVConst
@@ -19,9 +14,10 @@ import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformView
+import java.nio.ByteBuffer
 
 
-class LivePushView(context: Context, messenger: BinaryMessenger, args: HashMap<String, String>) : PlatformView, MethodChannel.MethodCallHandler {
+class LivePushView(context: Context, private val messenger: BinaryMessenger, args: HashMap<String, String>) : PlatformView, MethodChannel.MethodCallHandler {
     private val layoutRes = context.resources.getIdentifier(args["layout"], "layout", args["package"])
     private val frameLayout: View = View.inflate(context, layoutRes, null) as View
     private val methodChannel: MethodChannel = MethodChannel(messenger, "com/xinlianshiye/live/action")
@@ -42,13 +38,12 @@ class LivePushView(context: Context, messenger: BinaryMessenger, args: HashMap<S
         mStreamer.startCameraPreview()
     }
 
-    protected fun config() {
-        // 设置推流URL地址
-//        if (!TextUtils.isEmpty(mConfig.mUrl)) {
-//            mUrlTextView.setText(mConfig.mUrl)
-        mStreamer.url = "http://devinfo.ks-live.com:8420/info?model=Android%20SDK%20built%20for%20x86&osver=8.0.0"
-//        }
 
+    fun sendMessage(msg: String) {
+        messenger.send("com/xinlianshiye/live/return", ByteBuffer.wrap(msg.toByteArray()))
+    }
+
+    protected fun config() {
         // 设置推流分辨率
         mStreamer.setPreviewResolution(StreamerConstants.VIDEO_RESOLUTION_720P)
         mStreamer.setTargetResolution(StreamerConstants.VIDEO_RESOLUTION_720P)
@@ -87,8 +82,6 @@ class LivePushView(context: Context, messenger: BinaryMessenger, args: HashMap<S
         mStreamer.rotateDegrees = 0
 //        }
 
-        // 选择前后摄像头
-//        mStreamer.cameraFacing = mConfig.mCameraFacing
 
         // 设置预览View
         // 设置回调处理函数
@@ -116,9 +109,6 @@ class LivePushView(context: Context, messenger: BinaryMessenger, args: HashMap<S
         // 设置美颜滤镜，关于美颜滤镜的具体说明请参见专题说明以及完整版demo
 //        mStreamer.imgTexFilterMgt.setFilter(mStreamer.glRender,
 //                ImgTexFilterMgt.KSY_FILTER_BEAUTY_PRO3)
-        mStreamer.imgTexFilterMgt.setFilter(
-                mStreamer.glRender, ImgTexFilterMgt.KSY_FILTER_BEAUTY_SMOOTH);
-
     }
 
     override fun getView(): View = frameLayout
@@ -127,8 +117,12 @@ class LivePushView(context: Context, messenger: BinaryMessenger, args: HashMap<S
         println("销毁了")
     }
 
+
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
+            /**
+             * 设置推流地址
+             */
             "setUrl" -> {
                 if (mStreamer != null) {
                     mStreamer.url = call.arguments.toString()
@@ -137,17 +131,61 @@ class LivePushView(context: Context, messenger: BinaryMessenger, args: HashMap<S
                     result.error("FALSE", "工具类没有初始化", null)
                 }
             }
+            /**
+             * 开始推流
+             */
             "startPush" -> {
                 mStreamer?.startStream()
             }
+            /**
+             * 停止推流
+             */
             "stopPush" -> {
                 mStreamer?.stopStream()
             }
+            /**
+             * 开始录像
+             */
             "startRecord" -> {
                 mStreamer?.startRecord(call.arguments.toString())
             }
+            /**
+             * 停止录像
+             */
             "stopRecord" -> {
                 mStreamer?.stopRecord()
+            }
+            /**
+             * 设置滤镜
+             */
+            "setFilter" -> {
+                if (call.arguments == null) {
+                    mStreamer?.imgTexFilterMgt?.setFilter(
+                            mStreamer.glRender, ImgTexFilterMgt.KSY_FILTER_BEAUTY_DISABLE);
+                } else {
+                    mStreamer?.imgTexFilterMgt?.setFilter(
+                            mStreamer.glRender, call.arguments.toString().toInt());
+                }
+            }
+            "setPreviewResolution" -> {
+                /**
+                 * 设置预览分辨率
+                 */
+                call.arguments?.toString()?.toInt()?.let { mStreamer?.setPreviewResolution(it) }
+            }
+            "setTargetResolution" -> {
+                /**
+                 * 设置推流分辨率
+                 */
+                call.arguments?.toString()?.toInt()?.let { mStreamer?.setTargetResolution(it) }
+            }
+            "setCameraFacing" -> {
+                /**
+                 * 选择前后摄像头
+                 */
+                call?.arguments?.toString()?.toInt()?.let {
+                    mStreamer.cameraFacing = it
+                }
             }
             else -> {
                 println(call.method)
