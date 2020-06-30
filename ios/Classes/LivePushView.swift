@@ -12,17 +12,35 @@ public class LivePushView: NSObject, FlutterPlatformView {
     fileprivate var channel: FlutterMethodChannel!
     fileprivate var frame: CGRect;
     var layoutName: String?;
-    var _view:UIView?;
     var _currentPinchZoomFactor: CGFloat?     //当前触摸缩放因子
+    var _view: UIView;
+
+    func initKit() {
+        if kit == nil {
+            kit = KSYGPUStreamerKit.init(defaultCfg: ())
+        }
+        print("版本号:\(String(describing: kit?.getKSYVersion()))")
+        if kit != nil {
+            addPinchGestureRecognizer()
+            kit?.streamerProfile = KSYStreamerProfile(rawValue: 200)!
+            kit?.cameraPosition = AVCaptureDevice.Position.front
+            kit?.videoOrientation = UIApplication.shared.statusBarOrientation
+            kit?.previewDimension = CGSize.init(width: 1080, height: 1920)
+            kit?.streamDimension = CGSize.init(width: 720, height: 1280)
+            kit?.startPreview(view())
+        }
+    }
 
     public init(withFrame frame: CGRect, viewIdentifier viewId: Int64, arguments args: Dictionary<String, String>, binaryMessenger: FlutterBinaryMessenger) {
         self.frame = frame
         self.viewId = viewId
         self.layoutName = args["layout"]
         self.channel = FlutterMethodChannel(name: "com/xinlianshiye/live/action", binaryMessenger: binaryMessenger)
+        //
+        self._view = UIView(frame: CGRect(x: 0, y: 0, width: (Int.init(args["width"] ?? "200") ?? 200  ), height: (Int.init(args["height"] ?? "200" ) ?? 200)));
+        self._view.backgroundColor = UIColor.cyan
         super.init()
 
-        //
         self.channel.setMethodCallHandler({
             [weak self]
             (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
@@ -30,30 +48,18 @@ public class LivePushView: NSObject, FlutterPlatformView {
                 this.onMethodCall(call: call, result: result)
             }
         })
-        //工具类初始化
-        if kit == nil {
-            kit = KSYGPUStreamerKit.init(defaultCfg: ())
-        }
-        print("版本号:\(String(describing: kit?.getKSYVersion()))")
-        if kit != nil {
-            _view=view()
-            addPinchGestureRecognizer()
-            kit?.streamerProfile = KSYStreamerProfile(rawValue: 200)!
-            kit?.cameraPosition = AVCaptureDevice.Position.front
-            kit?.videoOrientation = UIApplication.shared.statusBarOrientation
-            kit?.previewDimension = CGSize.init(width: 1080, height: 1920)
-            kit?.streamDimension = CGSize.init(width: 720, height: 1280)
-            kit?.startPreview(_view)
-            
-        }
+        self.initKit()
+
     }
 
-    
-    
+    public func view() -> UIView {
+        return self._view
+    }
+
     //添加缩放手势，缩放时镜头放大或缩小
     func addPinchGestureRecognizer() {
         let pinch = UIPinchGestureRecognizer.init(target: self, action: #selector(pinchDetected(rec:)))
-        _view?.addGestureRecognizer(pinch)
+        self._view.addGestureRecognizer(pinch)
     }
 
     @objc func pinchDetected(rec: UIPinchGestureRecognizer) {
@@ -64,17 +70,6 @@ public class LivePushView: NSObject, FlutterPlatformView {
         kit?.pinchZoomFactor = zoomFactor
     }
 
-    public func view() -> UIView {
-        let uiView = UIView(frame: self.frame)
-        if layoutName != nil {
-            uiView.layoutMargins = UIEdgeInsets(top: CGFloat(0), left: CGFloat(0), bottom: CGFloat(0), right: CGFloat(0))
-            let nibObjects = Bundle.main.loadNibNamed(layoutName!, owner: nil, options: nil)
-            let view2 = nibObjects!.first as! UIView
-            uiView.addSubview(view2)
-        }
-        
-        return uiView
-    }
 
     func onMethodCall(call: FlutterMethodCall, result: @escaping FlutterResult) {
         let method = call.method
