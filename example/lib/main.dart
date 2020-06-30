@@ -1,8 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:live_rtmp_push_plugin/live_rtmp_push_plugin.dart';
+import 'package:live_rtmp_push_plugin/push_view.dart';
 
 void main() {
   runApp(MyApp());
@@ -35,20 +33,11 @@ class _MyAppState extends State<MyApp> {
             Stack(
               children: <Widget>[
                 SizedBox(
-                  height: 500,
-                  child: Platform.isIOS
-                      ? UiKitView(
-                          viewType: "com.xinlianshiye.live",
-                        )
-                      : AndroidView(
-                          viewType: "com.xinlianshiye.live",
-                          creationParams: <String, String>{
-                            "layout": "livemain",
-                            "package":
-                                "com.xinlianshiye.live.live_rtmp_push_plugin_example",
-                          },
-                          creationParamsCodec: const StandardMessageCodec(),
-                        ),
+                  height: 400,
+                  child: PushView(
+                    200,
+                    200,
+                  ),
                 ),
                 Positioned(
                   child: Text("遮挡物"),

@@ -37,8 +37,7 @@ public class LivePushView: NSObject, FlutterPlatformView {
         self.layoutName = args["layout"]
         self.channel = FlutterMethodChannel(name: "com/xinlianshiye/live/action", binaryMessenger: binaryMessenger)
         //
-        self._view = UIView(frame: CGRect(x: 0, y: 0, width: (Int.init(args["width"] ?? "200") ?? 200  ), height: (Int.init(args["height"] ?? "200" ) ?? 200)));
-        self._view.backgroundColor = UIColor.cyan
+        self._view = UIView(frame: CGRect(x: 0, y: 0, width: (Int.init(args["width"] ?? "200") ?? 200), height: (Int.init(args["height"] ?? "200") ?? 200)));
         super.init()
 
         self.channel.setMethodCallHandler({

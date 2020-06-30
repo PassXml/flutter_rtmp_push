@@ -4,6 +4,7 @@ package com.xinlianshiye.live
 import android.content.Context
 import android.opengl.GLSurfaceView
 import android.view.View
+import android.widget.RelativeLayout
 import com.ksyun.media.streamer.encoder.VideoEncodeFormat
 import com.ksyun.media.streamer.filter.imgtex.ImgTexFilterMgt
 import com.ksyun.media.streamer.framework.AVConst
@@ -18,14 +19,15 @@ import java.nio.ByteBuffer
 
 
 class LivePushView(context: Context, private val messenger: BinaryMessenger, args: HashMap<String, String>) : PlatformView, MethodChannel.MethodCallHandler {
-    private val layoutRes = context.resources.getIdentifier(args["layout"], "layout", args["package"])
-    private val frameLayout: View = View.inflate(context, layoutRes, null) as View
+    private val layout: RelativeLayout
     private val methodChannel: MethodChannel = MethodChannel(messenger, "com/xinlianshiye/live/action")
-    private var mGLSurfaceView: GLSurfaceView = frameLayout.findViewById(context.resources.getIdentifier("gl_surface_view", "id", args["package"]))
+    private var mGLSurfaceView: GLSurfaceView = GLSurfaceView(context)
     private var mStreamer: KSYStreamer
 
 
     init {
+        layout = RelativeLayout(context)
+        layout.addView(mGLSurfaceView)
         methodChannel.setMethodCallHandler(this);
         mStreamer = KSYStreamer(context);
         config()
@@ -81,24 +83,22 @@ class LivePushView(context: Context, private val messenger: BinaryMessenger, arg
 //            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
         mStreamer.rotateDegrees = 0
 //        }
-
-
         // 设置预览View
         // 设置回调处理函数
-        mStreamer.onInfoListener = KSYStreamer.OnInfoListener { i, i2, i3 ->
-            println("回调参数")
-            println(i)
-            println(i2)
-            println(i3)
-
-        }
-        mStreamer.onErrorListener = KSYStreamer.OnErrorListener { iMediaPlayer, i, i1 ->
-            println("发生错误")
-            println(iMediaPlayer)
-            println(i)
-            println(i1)
-            false
-        }
+//        mStreamer.onInfoListener = KSYStreamer.OnInfoListener { i, i2, i3 ->
+//            println("回调参数")
+//            println(i)
+//            println(i2)
+//            println(i3)
+//
+//        }
+//        mStreamer.onErrorListener = KSYStreamer.OnErrorListener { iMediaPlayer, i, i1 ->
+//            println("发生错误")
+//            println(iMediaPlayer)
+//            println(i)
+//            println(i1)
+//            false
+//        }
 
         // 禁用后台推流时重复最后一帧的逻辑（这里我们选择切后台使用背景图推流的方式）
         mStreamer.enableRepeatLastFrame = false
@@ -111,7 +111,7 @@ class LivePushView(context: Context, private val messenger: BinaryMessenger, arg
 //                ImgTexFilterMgt.KSY_FILTER_BEAUTY_PRO3)
     }
 
-    override fun getView(): View = frameLayout
+    override fun getView(): View = layout
 
     override fun dispose() {
         println("销毁了")
