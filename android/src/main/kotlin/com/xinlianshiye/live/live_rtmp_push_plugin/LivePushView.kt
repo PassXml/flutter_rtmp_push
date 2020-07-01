@@ -1,9 +1,15 @@
 package com.xinlianshiye.live
 
 
+import android.R
+import android.R.attr.orientation
 import android.content.Context
+import android.content.res.Configuration
 import android.opengl.GLSurfaceView
+import android.view.OrientationEventListener
+import android.view.Surface
 import android.view.View
+import android.view.WindowManager
 import android.widget.RelativeLayout
 import com.ksyun.media.streamer.encoder.VideoEncodeFormat
 import com.ksyun.media.streamer.filter.imgtex.ImgTexFilterMgt
@@ -18,21 +24,24 @@ import io.flutter.plugin.platform.PlatformView
 import java.nio.ByteBuffer
 
 
-class LivePushView(context: Context, private val messenger: BinaryMessenger, args: HashMap<String, String>) : PlatformView, MethodChannel.MethodCallHandler {
-    private val layout: RelativeLayout
+class LivePushView(context: Context, private val messenger: BinaryMessenger, args: HashMap<String, String>) : PlatformView, MethodChannel.MethodCallHandler, OrientationEventListener(context) {
+    private val layout: RelativeLayout = RelativeLayout(context)
     private val methodChannel: MethodChannel = MethodChannel(messenger, "com/xinlianshiye/live/action")
     private var mGLSurfaceView: GLSurfaceView = GLSurfaceView(context)
     private var mStreamer: KSYStreamer
 
+    //    final rotation:Int = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation()
+    val rotation: Int = (context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.rotation
+
 
     init {
-        layout = RelativeLayout(context)
         layout.addView(mGLSurfaceView)
         methodChannel.setMethodCallHandler(this);
         mStreamer = KSYStreamer(context);
         config()
         mStreamer.setDisplayPreview(mGLSurfaceView)
         startCameraPreviewWithPermCheck()
+        this.enable()
     }
 
     //开启预览,注意相关权限必须开启
@@ -183,8 +192,42 @@ class LivePushView(context: Context, private val messenger: BinaryMessenger, arg
                 /**
                  * 选择前后摄像头
                  */
-                call?.arguments?.toString()?.toInt()?.let {
-                    mStreamer.cameraFacing = it
+                when (call.arguments) {
+                    0 -> {
+                        mStreamer.cameraFacing = 0
+                    }
+                    1 -> {
+                        mStreamer.cameraFacing = 1
+                    }
+                }
+
+            }
+            /** 设置方向 */
+            "setRotateDegrees" -> {
+                when (call.arguments) {
+                    0 -> {
+                        mStreamer.rotateDegrees = 0
+                    }
+                    1 -> {
+                        mStreamer.rotateDegrees = 90
+                    }
+                    2 -> {
+                        mStreamer.rotateDegrees = 180
+                    }
+                    3 -> {
+                        mStreamer.rotateDegrees = 270
+                    }
+                    4 -> {
+                        mStreamer.rotateDegrees = 360
+                    }
+                }
+            }
+            "setSyncOrientation" -> {
+                when (call.arguments) {
+                    true ->
+                        this.enable()
+                    false ->
+                        this.disable()
                 }
             }
             else -> {
@@ -192,6 +235,22 @@ class LivePushView(context: Context, private val messenger: BinaryMessenger, arg
                 println(call.arguments)
                 result.success("OK")
             }
+        }
+    }
+
+    override fun onOrientationChanged(orientation: Int) {
+        if (orientation > 350 || orientation < 10) { //0度
+            mStreamer.rotateDegrees = 0
+        } else if (orientation in 81..99) { //90度
+            mStreamer.rotateDegrees = 270
+
+        } else if (orientation in 171..189) { //180度
+            mStreamer.rotateDegrees = 180
+
+        } else if (orientation in 261..279) { //270度
+            mStreamer.rotateDegrees = 90
+        } else {
+            return;
         }
     }
 }
