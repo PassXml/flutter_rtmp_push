@@ -14,6 +14,7 @@ public class LivePushView: NSObject, FlutterPlatformView {
     var layoutName: String?;
     var _currentPinchZoomFactor: CGFloat?     //当前触摸缩放因子
     var _view: UIView;
+    var curFilter: KSYGPUFilter?;
 
     func initKit() {
         if kit == nil {
@@ -48,8 +49,13 @@ public class LivePushView: NSObject, FlutterPlatformView {
             }
         })
         self.initKit()
-
+        self.addOrientationDidChangeNotification()
     }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
 
     public func view() -> UIView {
         return self._view
@@ -88,17 +94,120 @@ public class LivePushView: NSObject, FlutterPlatformView {
             kit?.streamerBase.startBypassRecord(NSURL.init(string: call.arguments as! String)! as URL)
         case "stopRecord":
             kit?.streamerBase.stopBypassRecord()
+        case "setTargetResolution":
+            switch (call.arguments as! Int) {
+            case 0:
+                kit?.streamDimension = CGSize(width: 360, height: 640)
+                break
+            case 1:
+                kit?.streamDimension = CGSize(width: 480, height: 640)
+                break
+            case 2:
+                kit?.streamDimension = CGSize(width: 540, height: 960)
+                break
+            case 4:
+                kit?.streamDimension = CGSize(width: 1080, height: 1920)
+                break
+            default:
+                kit?.streamDimension = CGSize(width: 720, height: 1280)
+                break
+            }
+        case "setPreviewResolution":
+            switch (call.arguments as! Int) {
+            case 0:
+                kit?.streamDimension = CGSize(width: 360, height: 640)
+                break
+            case 1:
+                kit?.streamDimension = CGSize(width: 480, height: 640)
+                break
+            case 2:
+                kit?.streamDimension = CGSize(width: 540, height: 960)
+                break
+            case 4:
+                kit?.streamDimension = CGSize(width: 1080, height: 1920)
+                break
+            case 3:
+                kit?.streamDimension = CGSize(width: 720, height: 1280)
+                break
+            default:
+                break
+            }
         case "setFilter":
             if call.arguments == nil {
+                curFilter = nil
                 kit?.setupFilter(nil)
             } else {
-                kit?.setupFilter(KSYGPUBeautifyExtFilter()!)
+                curFilter = KSYGPUBeautifyExtFilter()
+                kit?.setupFilter(curFilter)
+            }
+        case "setCameraFacing":
+            switch (call.arguments as! Int) {
+            case 0:kit?.cameraPosition = AVCaptureDevice.Position.back
+                break
+            default:
+                kit?.cameraPosition = AVCaptureDevice.Position.front
+                break
+            }
+        case "setRotateDegrees":
+            switch (call.arguments as! Int) {
+            case 1:
+                setRotate(value: UIInterfaceOrientation.landscapeLeft)
+                break
+            case 2:
+                setRotate(value: UIInterfaceOrientation.portraitUpsideDown)
+                break
+            case 3:
+                setRotate(value: UIInterfaceOrientation.landscapeRight)
+                break
+            case 4:
+                setRotate(value: UIInterfaceOrientation.unknown)
+                break
+            default:
+                setRotate(value: UIInterfaceOrientation.portrait)
+                break
+            }
+        case "setSyncOrientation":
+            switch (call.arguments as! Bool) {
+            case true:
+                addOrientationDidChangeNotification()
+                break
+            default:
+                NotificationCenter.default.removeObserver(self)
+
+                break
             }
         default:
             result("OK")
             print(call.method)
             print(call.arguments ?? "No Value")
         }
+    }
+
+    func setRotate(value: UIInterfaceOrientation) {
+        kit?.rotatePreview(to: value)
+        kit?.rotateStream(to: value)
+    }
+
+    func addOrientationDidChangeNotification() {
+        NotificationCenter.default.addObserver(self, selector: #selector(self.willOritate(noti:)), name: UIDevice.orientationDidChangeNotification, object: nil)
+    }
+
+    @objc func willOritate(noti: NSNotification) {
+        switch (UIDevice.current.orientation.rawValue) {
+        case 2:
+            setRotate(UIInterfaceOrientation.portraitUpsideDown)
+            break
+        case 3:
+            setRotate(UIInterfaceOrientation.landscapeRight)
+            break
+        case 4:
+            setRotate(UIInterfaceOrientation.landscapeLeft)
+            break
+        default:
+            setRotate(UIInterfaceOrientation.portrait)
+        }
+
+
     }
 }
 

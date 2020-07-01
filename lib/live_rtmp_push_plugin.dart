@@ -33,8 +33,49 @@ class LiveRtmpPushPlugin {
     _channel.invokeMethod("setFilter", id);
   }
 
+  static Future setPreviewResolution(Resolution label) async {
+    _channel.invokeMethod("setPreviewResolution", ResolutionValue[label]);
+  }
+
+  static Future setTargetResolution(Resolution label) async {
+    _channel.invokeMethod("setTargetResolution", ResolutionValue[label]);
+  }
+
+  static Future setRotateDegrees(RotateDegrees label) async {
+    _channel.invokeMethod("setRotateDegrees", RotateDegreesValue[label]);
+  }
+
+  static Future setSyncOrientation() async {
+    _channel.invokeMethod("setSyncOrientation");
+  }
+
   static Future<String> get platformVersion async {
     final String version = await _channel2.invokeMethod('getPlatformVersion');
     return version;
   }
 }
+
+enum Resolution { P360, P480, P540, P720, P1080 }
+
+const ResolutionValue = {
+  Resolution.P360: 0,
+  Resolution.P480: 1,
+  Resolution.P540: 2,
+  Resolution.P720: 3,
+  Resolution.P1080: 4,
+};
+enum RotateDegrees {
+  portrait,
+  landscapeLeft,
+  portraitUpsideDown,
+  landscapeRight,
+  unknown
+}
+
+const RotateDegreesValue = {
+  RotateDegrees.portrait: 0,
+  RotateDegrees.landscapeLeft: 1,
+  RotateDegrees.portraitUpsideDown: 2,
+  RotateDegrees.landscapeRight: 3,
+  RotateDegrees.unknown: 4,
+};
