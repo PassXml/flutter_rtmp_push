@@ -173,7 +173,6 @@ public class LivePushView: NSObject, FlutterPlatformView {
                 break
             default:
                 NotificationCenter.default.removeObserver(self)
-
                 break
             }
         default:
@@ -195,16 +194,16 @@ public class LivePushView: NSObject, FlutterPlatformView {
     @objc func willOritate(noti: NSNotification) {
         switch (UIDevice.current.orientation.rawValue) {
         case 2:
-            setRotate(UIInterfaceOrientation.portraitUpsideDown)
+            setRotate(value: UIInterfaceOrientation.portraitUpsideDown)
             break
         case 3:
-            setRotate(UIInterfaceOrientation.landscapeRight)
+            setRotate(value: UIInterfaceOrientation.landscapeRight)
             break
         case 4:
-            setRotate(UIInterfaceOrientation.landscapeLeft)
+            setRotate(value: UIInterfaceOrientation.landscapeLeft)
             break
         default:
-            setRotate(UIInterfaceOrientation.portrait)
+            setRotate(value: UIInterfaceOrientation.portrait)
         }
 
 
