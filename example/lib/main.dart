@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:live_rtmp_push_plugin/live_rtmp_push_plugin.dart';
-import 'package:live_rtmp_push_plugin/push_view.dart';
+
+import 'Page2.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(MaterialApp(
+    home: MyApp(),
+  ));
 }
 
 class MyApp extends StatefulWidget {
@@ -21,61 +23,18 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('手机推流插件'),
-        ),
-        body: ListView(
-          scrollDirection: Axis.vertical,
-          shrinkWrap: true,
-          children: <Widget>[
-            Stack(
-              children: <Widget>[
-                SizedBox(
-                  height: 400,
-                  child: PushView(
-                    200,
-                    200,
-                  ),
-                ),
-                Positioned(
-                  child: Text("遮挡物"),
-                )
-              ],
-            ),
-            TextField(
-              decoration: InputDecoration(labelText: "推流地址"),
-              onSubmitted: (str) {
-                LiveRtmpPushPlugin.setUrl(
-                    "rtmp://192.168.3.44/live/rfBd56ti2SMtYvSgD5xAV0YU99zampta7Z7S575KLkIZ9PYk");
-              },
-            ),
-            FlatButton(
-              child: Text("美颜"),
-              onPressed: () {
-                LiveRtmpPushPlugin.setFilter(20);
-              },
-            ),
-            FlatButton(
-              child: Text("关闭美颜"),
-              onPressed: () {
-                LiveRtmpPushPlugin.setFilter(0);
-              },
-            ),
-            FlatButton(
-              child: Text("开始推流"),
-              onPressed: () {
-                LiveRtmpPushPlugin.startPush();
-              },
-            ),
-            FlatButton(
-              child: Text("关闭推流"),
-              onPressed: () {
-                LiveRtmpPushPlugin.stopPush();
-              },
-            )
-          ],
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('手机推流插件'),
+      ),
+      body: Center(
+        child: RaisedButton(
+          onPressed: () {
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+              return Page2();
+            }));
+          },
+          child: Text("Go"),
         ),
       ),
     );
