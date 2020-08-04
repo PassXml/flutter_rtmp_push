@@ -123,6 +123,7 @@ class LivePushView(context: Context, private val messenger: BinaryMessenger, arg
     override fun getView(): View = layout
 
     override fun dispose() {
+        mStreamer?.release()
         println("销毁了")
     }
 
