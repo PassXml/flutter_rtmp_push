@@ -25,6 +25,14 @@ class LiveRtmpPushPlugin {
     _channel.invokeMethod("stopPush");
   }
 
+  static Future pause() async {
+    _channel.invokeMethod("pause");
+  }
+
+  static Future resume() async {
+    _channel.invokeMethod("resume");
+  }
+
   static Future stopRecord() async {
     _channel.invokeMethod("stopRecord");
   }
