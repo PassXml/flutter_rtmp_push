@@ -29,6 +29,11 @@ class LiveRtmpPushPlugin {
     _channel.invokeMethod("pause");
   }
 
+  static Future<bool> release() async {
+    var result = await _channel.invokeMethod("release");
+    return result == "OK";
+  }
+
   static Future resume() async {
     _channel.invokeMethod("resume");
   }
