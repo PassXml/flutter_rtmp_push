@@ -32,13 +32,22 @@ public class LivePushView: NSObject, FlutterPlatformView {
         }
     }
 
+
     public init(withFrame frame: CGRect, viewIdentifier viewId: Int64, arguments args: Dictionary<String, String>, binaryMessenger: FlutterBinaryMessenger) {
         self.frame = frame
         self.viewId = viewId
         self.layoutName = args["layout"]
         self.channel = FlutterMethodChannel(name: "com/xinlianshiye/live/action", binaryMessenger: binaryMessenger)
         //
-        self._view = UIView(frame: CGRect(x: 0, y: 0, width: (Int.init(args["width"] ?? "200") ?? 200), height: (Int.init(args["height"] ?? "200") ?? 200)));
+        let width = UIScreen.main.bounds.width
+        let height = UIScreen.main.bounds.height
+        if (args["width"]! = null) {
+            width = Int.init(args["width"])
+        }
+        if (args["height"]! = null) {
+            width = Int.init(args["height"])
+        }
+        self._view = UIView(frame: CGRect(x: 0, y: 0, width: width, height: height));
         super.init()
 
         self.channel.setMethodCallHandler({
@@ -175,6 +184,14 @@ public class LivePushView: NSObject, FlutterPlatformView {
                 NotificationCenter.default.removeObserver(self)
                 break
             }
+        case "pause":
+            mStreamer?.stopCameraPreview()
+            mStreamer?.setUseDummyAudioCapture(true)
+            break
+        case "resume":
+            mStreamer?.startCameraPreview()
+            mStreamer?.setUseDummyAudioCapture(false);
+            break
         default:
             result("OK")
             print(call.method)

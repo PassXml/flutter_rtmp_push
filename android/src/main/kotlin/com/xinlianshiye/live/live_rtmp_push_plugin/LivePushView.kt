@@ -130,7 +130,6 @@ class LivePushView(context: Context, private val messenger: BinaryMessenger, arg
     }
 
 
-
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             /**
@@ -233,6 +232,14 @@ class LivePushView(context: Context, private val messenger: BinaryMessenger, arg
                     false ->
                         this.disable()
                 }
+            }
+            "pause" -> {
+                mStreamer?.stopCameraPreview()
+                mStreamer?.setUseDummyAudioCapture(true)
+            }
+            "resume" -> {
+                mStreamer?.startCameraPreview()
+                mStreamer?.setUseDummyAudioCapture(false);
             }
             else -> {
                 println(call.method)
