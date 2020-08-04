@@ -192,6 +192,9 @@ public class LivePushView: NSObject, FlutterPlatformView {
             mStreamer?.startCameraPreview()
             mStreamer?.setUseDummyAudioCapture(false);
             break
+        case "release":
+            result("OK")
+            break
         default:
             result("OK")
             print(call.method)

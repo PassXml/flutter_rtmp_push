@@ -241,6 +241,12 @@ class LivePushView(context: Context, private val messenger: BinaryMessenger, arg
                 mStreamer?.startCameraPreview()
                 mStreamer?.setUseDummyAudioCapture(false);
             }
+            "release"->{
+                mStreamer?.stopCameraPreview()
+                mStreamer?.setUseDummyAudioCapture(true)
+                mStreamer?.release()
+                result.success("OK")
+            }
             else -> {
                 println(call.method)
                 println(call.arguments)
