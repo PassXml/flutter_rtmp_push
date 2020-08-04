@@ -123,8 +123,6 @@ class LivePushView(context: Context, private val messenger: BinaryMessenger, arg
     override fun getView(): View = layout
 
     override fun dispose() {
-        mStreamer?.stopCameraPreview()
-        mStreamer?.setUseDummyAudioCapture(true)
         mStreamer?.release()
         println("销毁了")
     }
@@ -242,8 +240,6 @@ class LivePushView(context: Context, private val messenger: BinaryMessenger, arg
                 mStreamer?.setUseDummyAudioCapture(false);
             }
             "release"->{
-                mStreamer?.stopCameraPreview()
-                mStreamer?.setUseDummyAudioCapture(true)
                 mStreamer?.release()
                 result.success("OK")
             }
