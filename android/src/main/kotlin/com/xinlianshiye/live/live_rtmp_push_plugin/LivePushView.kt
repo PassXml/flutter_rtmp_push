@@ -202,7 +202,6 @@ class LivePushView(context: Context, private val messenger: BinaryMessenger, arg
                         mStreamer.cameraFacing = 1
                     }
                 }
-
             }
             /** 设置方向 */
             "setRotateDegrees" -> {
@@ -241,14 +240,16 @@ class LivePushView(context: Context, private val messenger: BinaryMessenger, arg
                 mStreamer?.setUseDummyAudioCapture(false);
             }
             "release" -> {
-                result.success("OK")
+
             }
             else -> {
+                println("没有实现")
                 println(call.method)
                 println(call.arguments)
-                result.success("OK")
+                result.notImplemented()
             }
         }
+        result.success("OK")
     }
 
     override fun onOrientationChanged(orientation: Int) {

@@ -45,7 +45,7 @@ public class LivePushView: NSObject, FlutterPlatformView {
             width = Int.init(args["width"])
         }
         if (args["height"]! = null) {
-            width = Int.init(args["height"])
+            height = Int.init(args["height"])
         }
         self._view = UIView(frame: CGRect(x: 0, y: 0, width: width, height: height));
         super.init()

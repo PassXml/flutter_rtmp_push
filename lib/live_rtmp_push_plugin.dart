@@ -21,6 +21,10 @@ class LiveRtmpPushPlugin {
     _channel.invokeMethod("startPush");
   }
 
+  static Future setCameraFacing(int i) async {
+    _channel.invokeMethod("setCameraFacing", i);
+  }
+
   static Future stopPush() async {
     _channel.invokeMethod("stopPush");
   }
